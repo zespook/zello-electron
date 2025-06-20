@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connect to Jellyfin</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+    }
+
+    .login-container {
+      background: rgba(40, 40, 40, 0.95);
+      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 420px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 1.8rem;
+      font-weight: 600;
+      background: linear-gradient(45deg, #00a4dc, #aa5cc3);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .input-group {
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: #e0e0e0;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.875rem;
+      background: rgba(60, 60, 60, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #00a4dc;
+      box-shadow: 0 0 0 3px rgba(0, 164, 220, 0.2);
+      background: rgba(70, 70, 70, 0.9);
+    }
+
+    input[type="text"]::placeholder {
+      color: #a0a0a0;
+    }
+
+    .connect-button {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(45deg, #00a4dc, #aa5cc3);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .connect-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 164, 220, 0.3);
+    }
+
+    .connect-button:active {
+      transform: translateY(0);
+    }
+
+    .error {
+      color: #ff6b6b;
+      margin-top: 1rem;
+      text-align: center;
+      font-size: 0.9rem;
+      min-height: 1.2rem;
+    }
+
+    .codec-info {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: rgba(0, 164, 220, 0.1);
+      border-left: 3px solid #00a4dc;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .codec-info h3 {
+      margin-bottom: 0.5rem;
+      color: #00a4dc;
+    }
+
+    .codec-list {
+      color: #c0c0c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>🎬 Jellyfin Client</h1>
+    <form id="server-form">
+      <div class="input-group">
+        <label for="server-url">Server Address</label>
+        <input 
+          type="text" 
+          id="server-url" 
+          placeholder="e.g., 192.168.1.100:8096 or jellyfin.mydomain.com" 
+          required
+          autocomplete="url"
+        >
+      </div>
+      <button type="submit" class="connect-button">Connect</button>
+      <p id="error-message" class="error"></p>
+    </form>
+
+    <div class="codec-info">
+      <h3>📹 Enhanced Codec Support</h3>
+      <div class="codec-list">
+        <strong>Video:</strong> H.264, H.265/HEVC, VP8, VP9, AV1, MPEG-4, VC-1<br>
+        <strong>Audio:</strong> AAC, MP3, AC-3, E-AC-3, DTS, TrueHD, FLAC, Opus<br>
+        <strong>Containers:</strong> MP4, MKV, WebM, AVI, MOV, TS, and more
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const serverForm = document.getElementById('server-form');
+      const serverUrlInput = document.getElementById('server-url');
+      const errorMessage = document.getElementById('error-message');
+
+      // Focus on input when page loads
+      serverUrlInput.focus();
+
+      serverForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const serverUrl = serverUrlInput.value.trim();
+        if (!serverUrl) {
+          showError('Please enter a server address');
+          return;
+        }
+        
+        // Clear previous errors and show loading state
+        errorMessage.textContent = '';
+        const submitButton = e.target.querySelector('button');
+        const originalText = submitButton.textContent;
+        submitButton.textContent = 'Connecting...';
+        submitButton.disabled = true;
+        
+        try {
+          const result = await window.jellyfin.connectToServer(serverUrl);
+          
+          if (!result.success) {
+            showError(`Failed to connect: ${result.error}`);
+          }
+        } catch (error) {
+          showError(`Connection error: ${error.message}`);
+        } finally {
+          // Restore button state
+          submitButton.textContent = originalText;
+          submitButton.disabled = false;
+        }
+      });
+
+      function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.animation = 'shake 0.5s ease-in-out';
+        setTimeout(() => {
+          errorMessage.style.animation = '';
+        }, 500);
+      }
+
+      // Add shake animation for errors
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+      `;
+      document.head.appendChild(style);
+    });
+  </script>
+</body>
+</html>
