@@ -14,7 +14,7 @@ A streamlined Electron-based desktop client for Jellyfin with enhanced codec sup
 
 ### Video Codecs
 - H.264 (AVC)
-- H.265 (HEVC) - up to 10-bit
+- H.265 (HEVC)
 - VP8, VP9
 - AV1
 - MPEG-4, MPEG-2
@@ -23,7 +23,6 @@ A streamlined Electron-based desktop client for Jellyfin with enhanced codec sup
 
 ### Audio Codecs
 - AAC, MP3
-- AC-3, E-AC-3
 - DTS, DTS-HD
 - Dolby TrueHD
 - FLAC, Opus
@@ -32,7 +31,7 @@ A streamlined Electron-based desktop client for Jellyfin with enhanced codec sup
 
 ### Container Formats
 - MP4, M4V
-- MKV (Matroska)
+- MKV
 - WebM
 - AVI, MOV
 - TS, M2TS
